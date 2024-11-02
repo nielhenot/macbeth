@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beveiligde Toegang</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #282c34;
+            color: white;
+            text-align: center;
+            padding: 50px;
+            overflow: hidden;
+        }
+        #codeInput, #submitButton {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+        }
+        #submitButton {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        #submitButton:hover {
+            background-color: #0056b3;
+        }
+        #alphabet {
+            display: none;
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #timer {
+            display: none;
+            font-size: 20px;
+            margin-top: 20px;
+            color: red;
+        }
+        #accessDenied {
+            display: none;
+            font-size: 48px;
+            color: red;
+            margin-top: 100px;
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        /* Sterren achtergrond */
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: white;
+            animation: twinkle 1s infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        /* Explosie effect */
+        #explosion {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Dag Inge,</h1>
+    <p>Het spijt me voor deze cryptische manier van praten, maar ik denk dat het in het belang van ons beiden is dat deze communicatie onder ons blijft. Ik slaap alleszins beter wetende dat alleen wij onze communicatie begrijpen. Als je het wachtwoord dat ik je gaf, hier ingeeft krijg je de ontcijferingscode. Zorg ervoor dat niemand meeleest!</p>
+    <p>Groetjes, Macbeth</p>
+
+    <input type="text" id="codeInput" placeholder="Wachtwoord">
+    <button id="submitButton">Verstuur</button>
+
+    <div id="alphabet">
+        <h2>Ontcijfercode</h2>
+        <p>A = 1, B = 2, C = 3, D = 4, E = 5, F = 6, G = 7, H = 8, I = 9, J = 10</p>
+        <p>K = 11, L = 12, M = 13, N = 14, O = 15, P = 16, Q = 17, R = 18, S = 19</p>
+        <p>T = 20, U = 21, V = 22, W = 23, X = 24, Y = 25, Z = 26</p>
+    </div>
+
+    <div id="timer"></div>
+    <div id="accessDenied">TOEGANG GEWEIGERD!</div>
+    <div id="explosion">
+        <img src="explosion.gif" alt="Explosie" style="width: 200px; height: auto;">
+    </div>
+    <audio id="explosionSound" src="explosion.mp3" preload="auto"></audio>
+
+    <script>
+        const correctPassword = "Homunculus";
+        const submitButton = document.getElementById('submitButton');
+        const codeInput = document.getElementById('codeInput');
+        const alphabetDiv = document.getElementById('alphabet');
+        const timerDiv = document.getElementById('timer');
+        const accessDeniedDiv = document.getElementById('accessDenied');
+        const explosionDiv = document.getElementById('explosion');
+        const explosionSound = document.getElementById('explosionSound');
+
+        let isAccessGranted = false; // To track if access has been granted
+
+        submitButton.onclick = function() {
+            const userInput = codeInput.value;
+
+            if (userInput === correctPassword && !isAccessGranted) {
+                isAccessGranted = true; // Set access granted to true
+                alphabetDiv.style.display = 'block'; // Maak het alfabet zichtbaar
+                startTimer(60); // Start een timer van 60 seconden
+                codeInput.value = ''; // Reset het invoerveld
+                alert("Toegang verleend!");
+            } else if (!isAccessGranted) {
+                alert("Onjuist wachtwoord, probeer het opnieuw.");
+            }
+        };
+
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            timerDiv.style.display = 'block'; // Maak de timer zichtbaar
+            const interval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerDiv.textContent = "Overige tijd: " + minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(interval);
+                    alphabetDiv.style.display = 'none'; // Verberg het alfabet
+                    timerDiv.style.display = 'none'; // Verberg de timer
+                    accessDeniedDiv.style.display = 'block'; // Toon toegang geweigerd bericht
+                    explosionDiv.style.display = 'block'; // Toon explosie
+                    explosionSound.play(); // Speel explosiegeluid af
+                    disableInput(); // Disable input after timer ends
+                }
+            }, 1000);
+        }
+
+        function disableInput() {
+            codeInput.disabled = true; // Disable input field
+            submitButton.disabled = true; // Disable submit button
+        }
+
+        // Sterren genereren
+        const starCount = 100; // Aantal sterren
+        for (let i = 0; i < starCount; i++) {
+            createStar();
+        }
+
+        function createStar() {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 5 + 2; // Stergrootte tussen 2 en 7 pixels
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.top = Math.random() * window.innerHeight + 'px';
+            star.style.left = Math.random() * window.innerWidth + 'px';
+            star.style.animationDuration = Math.random() * 1 + 0.5 + 's'; // Tussen 0.5 en 1.5 seconden
+            document.body.appendChild(star);
+        }
+
+    </script>
+
+</body>
+</html>
+
