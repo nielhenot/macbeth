@@ -1,176 +1,140 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beveiligde Toegang</title>
+    <title>Geheim Bericht</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #282c34;
+            background: linear-gradient(135deg, #ff7eb3, #65bfff);
             color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
             text-align: center;
-            padding: 50px;
-            overflow: hidden;
         }
-        #codeInput, #submitButton {
+
+        #message, #explosion, #timer {
+            display: none;
+        }
+
+        .explosion {
+            font-size: 3em;
+            color: red;
+            animation: flicker 0.1s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #password {
             padding: 10px;
-            margin: 10px;
-            font-size: 16px;
-            border: none;
+            font-size: 1em;
             border-radius: 5px;
+            border: 2px solid #fff;
         }
-        #submitButton {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-        }
-        #submitButton:hover {
-            background-color: #0056b3;
-        }
-        #alphabet {
-            display: none;
-            margin-top: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-        }
+
         #timer {
-            display: none;
-            font-size: 20px;
-            margin-top: 20px;
-            color: red;
-        }
-        #accessDenied {
-            display: none;
-            font-size: 48px;
-            color: red;
-            margin-top: 100px;
-            animation: fadeIn 1s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        /* Sterren achtergrond */
-        .star {
-            position: absolute;
-            border-radius: 50%;
-            background: white;
-            animation: twinkle 1s infinite alternate;
-        }
-        @keyframes twinkle {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-        /* Explosie effect */
-        #explosion {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: yellow;
         }
     </style>
 </head>
 <body>
+    <h1>Dag Inge</h1>
+    <p>Het spijt me van deze cryptische manier van communiceren, maar ik denk dat het voor ons beiden van belang is dat enkel wij weten waarover we het hebben. Het wachtwoord dat je hieronder moet ingeven is de naam van het café waar we hebben afgesproken, aan elkaar en in kleine letters.</p>
+    <p>Groetjes, Macbeth.</p>
 
-    <h1>Dag Inge,</h1>
-    <p>Het spijt me voor deze cryptische manier van praten, maar ik denk dat het in het belang van ons beiden is dat deze communicatie onder ons blijft. Ik slaap alleszins beter wetende dat alleen wij onze communicatie begrijpen. Als je het wachtwoord dat ik je gaf, hier ingeeft krijg je de ontcijferingscode. Zorg ervoor dat niemand meeleest!</p>
-    <p>Groetjes, Macbeth</p>
+    <input type="text" id="password" placeholder="Voer wachtwoord in">
+    <button onclick="checkPassword()">Verzenden</button>
 
-    <input type="text" id="codeInput" placeholder="Wachtwoord">
-    <button id="submitButton">Verstuur</button>
+    <div id="timer">Timer: 60</div>
 
-    <div id="alphabet">
-        <h2>Ontcijfercode</h2>
-        <p>A = 1, B = 2, C = 3, D = 4, E = 5, F = 6, G = 7, H = 8, I = 9, J = 10</p>
-        <p>K = 11, L = 12, M = 13, N = 14, O = 15, P = 16, Q = 17, R = 18, S = 19</p>
-        <p>T = 20, U = 21, V = 22, W = 23, X = 24, Y = 25, Z = 26</p>
+    <div id="message">
+        <p>Hier is de ontcijfercode:</p>
+        <pre>
+A   &
+B   #
+C   9
+D   %
+E   *
+F   5
+G   @
+H   ^
+I   7
+J   !
+K   4
+L   $
+M   8
+N   ?
+O   2
+P   =
+Q   6
+R   +
+S   /
+T   <
+U   3
+V   }
+W   (
+X   ]
+Y   £
+Z   “
+        </pre>
     </div>
 
-    <div id="timer"></div>
-    <div id="accessDenied">TOEGANG GEWEIGERD!</div>
     <div id="explosion">
-        <img src="explosion.gif" alt="Explosie" style="width: 200px; height: auto;">
+        <p class="explosion">💥 BOEM! 💥</p>
     </div>
-    <audio id="explosionSound" src="explosion.mp3" preload="auto"></audio>
+
+    <audio id="explosion-sound">
+        <source src="explosion.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
-        const correctPassword = "Homunculus";
-        const submitButton = document.getElementById('submitButton');
-        const codeInput = document.getElementById('codeInput');
-        const alphabetDiv = document.getElementById('alphabet');
-        const timerDiv = document.getElementById('timer');
-        const accessDeniedDiv = document.getElementById('accessDenied');
-        const explosionDiv = document.getElementById('explosion');
-        const explosionSound = document.getElementById('explosionSound');
-
-        let isAccessGranted = false; // To track if access has been granted
-
-        submitButton.onclick = function() {
-            const userInput = codeInput.value;
-
-            if (userInput === correctPassword && !isAccessGranted) {
-                isAccessGranted = true; // Set access granted to true
-                alphabetDiv.style.display = 'block'; // Maak het alfabet zichtbaar
-                startTimer(60); // Start een timer van 60 seconden
-                codeInput.value = ''; // Reset het invoerveld
-                alert("Toegang verleend!");
-            } else if (!isAccessGranted) {
-                alert("Onjuist wachtwoord, probeer het opnieuw.");
-            }
-        };
+        let countdown;
 
         function startTimer(duration) {
-            let timer = duration, minutes, seconds;
-            timerDiv.style.display = 'block'; // Maak de timer zichtbaar
-            const interval = setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+            const timerElement = document.getElementById('timer');
+            timerElement.style.display = 'block';
+            let timeLeft = duration;
 
-                seconds = seconds < 10 ? "0" + seconds : seconds;
+            countdown = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `Timer: ${timeLeft}`;
 
-                timerDiv.textContent = "Overige tijd: " + minutes + ":" + seconds;
+                if (timeLeft === 7) { // 60 - 53 = 7
+                    const explosionSound = document.getElementById('explosion-sound');
+                    explosionSound.play();
+                }
 
-                if (--timer < 0) {
-                    clearInterval(interval);
-                    alphabetDiv.style.display = 'none'; // Verberg het alfabet
-                    timerDiv.style.display = 'none'; // Verberg de timer
-                    accessDeniedDiv.style.display = 'block'; // Toon toegang geweigerd bericht
-                    explosionDiv.style.display = 'block'; // Toon explosie
-                    explosionSound.play(); // Speel explosiegeluid af
-                    disableInput(); // Disable input after timer ends
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    document.getElementById('message').style.display = 'none';
+                    document.getElementById('explosion').style.display = 'block';
                 }
             }, 1000);
         }
 
-        function disableInput() {
-            codeInput.disabled = true; // Disable input field
-            submitButton.disabled = true; // Disable submit button
-        }
+        function checkPassword() {
+            const password = document.getElementById('password').value;
+            const correctPassword = 'deblauwekater';
+            const messageDiv = document.getElementById('message');
 
-        // Sterren genereren
-        const starCount = 100; // Aantal sterren
-        for (let i = 0; i < starCount; i++) {
-            createStar();
+            if (password === correctPassword) {
+                messageDiv.style.display = 'block';
+                startTimer(60);
+            } else {
+                alert('Onjuist wachtwoord. Probeer opnieuw.');
+            }
         }
-
-        function createStar() {
-            const star = document.createElement('div');
-            star.className = 'star';
-            const size = Math.random() * 5 + 2; // Stergrootte tussen 2 en 7 pixels
-            star.style.width = size + 'px';
-            star.style.height = size + 'px';
-            star.style.top = Math.random() * window.innerHeight + 'px';
-            star.style.left = Math.random() * window.innerWidth + 'px';
-            star.style.animationDuration = Math.random() * 1 + 0.5 + 's'; // Tussen 0.5 en 1.5 seconden
-            document.body.appendChild(star);
-        }
-
     </script>
-
 </body>
 </html>
 
